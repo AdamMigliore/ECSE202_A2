@@ -8,17 +8,20 @@ public class aBall extends Thread {
 	private static final double g = 9.8; // MKS gravitational constant 9.8 m/s^2
 	private static final double Pi = 3.141592654; // To convert degrees to radians
 	private static final double k = 0.0016;// constant K value
+	private static final double ETHR = 0.1;
 
 	private double theta, bSize, bLoss;
 	private Color bColor;
 	private GOval myBall;
+
 	private int WIDTH, HEIGHT;
 	private double scale;
 
 	private double Xi, Yi, X, Y, XLast, YLast;
 	private double Vt, Vox, Voy, Vo, Vx, Vy;
-	private double KEx, KEy;
+	private double KEx, KEy, totalEnergy = 1;
 	private double time;
+	private boolean canLoop = true;
 	private final double TICK = 0.1;
 	private int ScrX, ScrY;
 
@@ -40,8 +43,8 @@ public class aBall extends Thread {
 	}
 
 	private void createBall() {
-		myBall = new GOval(meterToPixels(scale, Xi), HEIGHT - meterToPixels(scale, Yi*2), meterToPixels(scale, bSize * 2),
-				meterToPixels(scale, bSize * 2));
+		myBall = new GOval(gUtil.meterToPixels(scale, Xi), HEIGHT - gUtil.meterToPixels(scale, Yi * 2),
+				gUtil.meterToPixels(scale, bSize * 2), gUtil.meterToPixels(scale, bSize * 2));
 		myBall.setFilled(true);
 		myBall.setFillColor(this.bColor);
 	}
@@ -65,6 +68,13 @@ public class aBall extends Thread {
 			Yi = bSize;
 			YLast = bSize;
 			XLast = 0;
+
+			if ((KEx + KEy) < totalEnergy && (KEx + KEy) > ETHR) {
+				totalEnergy = KEx + KEy;
+			} else {
+				canLoop = !canLoop;
+			}
+
 		}
 
 		X = Xi + Vox * Vt / g * (1 - Math.exp(-g * time / Vt));// calculate X
@@ -72,8 +82,8 @@ public class aBall extends Thread {
 		Vx = (X - XLast) / TICK;// Calculate horizontal velocity
 		Vy = (Y - YLast) / TICK;// calculate vertical velocity
 
-		ScrX = meterToPixels(scale, X);// convert to screen units
-		ScrY = (HEIGHT - meterToPixels(scale, Y + 2 * bSize));// convert to screen units
+		ScrX = gUtil.meterToPixels(scale, X);// convert to screen units
+		ScrY = (HEIGHT - gUtil.meterToPixels(scale, (Y + bSize)));// convert to screen units
 		XLast = X;// save last X
 		YLast = Y;// save last Y
 
@@ -81,21 +91,19 @@ public class aBall extends Thread {
 	}
 
 	public void start() {
-		calculateVariables();
-		time += TICK;
-		try { // pause for 50 milliseconds
-			Thread.sleep(50);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+		while (canLoop) {
+			calculateVariables();
+			time += TICK;
+			try { // pause for 50 milliseconds
+				Thread.sleep(50);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 
 	}
 
 	public GOval getBall() {
 		return myBall;
-	}
-
-	private int meterToPixels(double scale, double meter) {
-		return (int) (meter * scale);
 	}
 }
