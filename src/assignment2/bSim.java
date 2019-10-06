@@ -22,20 +22,20 @@ public class bSim extends GraphicsProgram {
 	private static final double ThetaMIN = 80.0; // Minimum launch angle (degrees)
 	private static final double ThetaMAX = 100.0; // Maximum launch angle (degrees)
 	private static final int GP_HEIGHT = 3; // Maximum launch angle (degrees)
+	private RandomGenerator rgen = new RandomGenerator();
 
 	public void run() {
-
 		setupDisplay();
 		for (int i = 0; i < NUMBALLS; i++) {
-			
-			RandomGenerator rgen = new RandomGenerator();
+
 			double Vo = rgen.nextDouble(VoMIN, VoMAX);
 			double theta = rgen.nextDouble(ThetaMIN, ThetaMAX);
 			double bSize = (int) rgen.nextDouble(MINSIZE, MAXSIZE);
 			double bLoss = rgen.nextDouble(EMIN, EMAX);
 			Color bColor = rgen.nextColor();
 
-			aBall ball = new aBall(0, bSize, Vo, theta, bSize, bColor, bLoss, SCALE, WIDTH, HEIGHT);
+			aBall ball = new aBall(gUtil.pixelsToMeter(SCALE, WIDTH / 2), bSize, Vo, theta, bSize, bColor, bLoss, SCALE,
+					WIDTH, HEIGHT);
 			add(ball.getBall());
 			ball.start();
 		}
